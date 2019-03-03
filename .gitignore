@@ -1,0 +1,7 @@
+dataset
+originalImages
+projectEnv
+testSet
+trainingSet
+validationSet 
+preprocessData.py
