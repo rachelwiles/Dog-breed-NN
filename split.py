@@ -2,6 +2,7 @@ import os
 import shutil
 import random
 import sys
+import math
 
 
 def main():
@@ -39,16 +40,34 @@ def main():
 		print("Error: Invalid Split")
 		quit()
 
+		
+	categories = os.listdir("./originalImages")
 
-	categories = os.listdir("./dataset")
 
 	for folder in categories:
-		print("Processing folder: {}".format(folder))
+
+		print("-------------------------------------")
+		print("Processing class {}".format(folder))
 
 		# Get the file paths to all the input images
-		files = os.listdir("./dataset/{}".format(folder))
+		files = os.listdir("./originalImages/{}".format(folder))
 
-		# Creqte an training set output folders
+		# Get number of files in each folder
+		numberOfFiles = len([name for name in os.listdir("./originalImages/{}".format(folder)) if os.path.isfile(os.path.join("./originalImages/{}".format(folder), name))])
+		print("Total images: {}".format(numberOfFiles))
+
+		numberTrainingImages = math.floor(numberOfFiles / 100) * int(trainingSplit)
+		numberValidationImages = math.floor(numberOfFiles / 100) * int(validationSplit)
+		numberTestImages = math.floor(numberOfFiles / 100) * int(testSplit)
+		print("Number of training images: {}".format(numberTrainingImages))
+		print("Number of validation images: {}".format(numberValidationImages))
+		print("Number of test images: {}".format(numberTestImages))
+
+		#-------------------------
+		# SOMETHING HERE TO CONVERT % SPLIT TO NUMBER OF FILES FOR EACH FOLDER TO OUTPUT
+		#-------------------------
+		
+		# Create an training set output folders
 		os.mkdir("./trainingSet/{}{}-{}".format(trainingSplit,"%",folder))
 
 		# Create a validation set output folder
@@ -57,9 +76,21 @@ def main():
 		# Create a test set output folder
 		os.mkdir("./testSet/{}{}-{}".format(testSplit,"%",folder))
 
-		
-		# Start the output file names counter (for naming files 1.jpg, 2.jpg, etc)
+		# Start output filename counter
 		fileName = 1
+
+		# for picture in files:
+
+		# 	cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), trainingImages)
+		# 	fileName = fileName + 1
+			
+		# 	cv.imwrite("./validationSet/{}/{}.jpg".format(folder,fileName), validationImages)
+		# 	fileName = fileName + 1
+
+		# 	cv.imwrite("./testSet/{}/{}.jpg".format(folder,fileName), testImages)
+		# 	fileName = fileName + 1
+
+		
 
 
 if __name__ == '__main__':
