@@ -8,14 +8,6 @@ import cv2 as cv
 
 def main():
 
-	# Clear out the dataset folder
-	try:
-		shutil.rmtree("./dataset")
-	except FileNotFoundError:
-		pass	
-
-	os.mkdir("./dataset")
-
 	categories = os.listdir("./originalImages")
 
 	for folder in categories:
@@ -24,8 +16,8 @@ def main():
 		# Get the file paths to all the input images
 		files = os.listdir("./originalImages/{}".format(folder))
 
-		# Creqte an output folder
-		os.mkdir("./dataset/{}".format(folder))
+		# Source an output folder
+		os.listdir("./trainingSet/{}".format(folder))
  
 		# Start the output file names counter (for naming files 1.jpg, 2.jpg, etc)
 		fileName = 1
@@ -42,13 +34,13 @@ def main():
 			img2 = cropImage(img, random.uniform(0, 0.1), random.uniform(0, 0.1))
 			img3 = cropImage(img, random.uniform(0, 0.1), random.uniform(0, 0.1))
 
-			cv.imwrite("./dataset/{}/{}.jpg".format(folder,fileName), img1)
+			cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), img1)
 			fileName = fileName + 1
 			
-			cv.imwrite("./dataset/{}/{}.jpg".format(folder,fileName), img2)
+			cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), img2)
 			fileName = fileName + 1
 
-			cv.imwrite("./dataset/{}/{}.jpg".format(folder,fileName), img3)
+			cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), img3)
 			fileName = fileName + 1
 
 
@@ -57,13 +49,13 @@ def main():
 			img5 = rotateImage(img, random.uniform(0, 360))
 			img6 = rotateImage(img, random.uniform(0, 360))
 
-			cv.imwrite("./dataset/{}/{}.jpg".format(folder,fileName), img4)
+			cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), img4)
 			fileName = fileName + 1
 			
-			cv.imwrite("./dataset/{}/{}.jpg".format(folder,fileName), img5)
+			cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), img5)
 			fileName = fileName + 1
 
-			cv.imwrite("./dataset/{}/{}.jpg".format(folder,fileName), img6)
+			cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), img6)
 			fileName = fileName + 1
 
 
