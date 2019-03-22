@@ -3,7 +3,12 @@ import shutil
 import random
 import sys
 import math
+import cv2 as cv
 
+# NB: This will take all classes and split each class the % split defined. As the 
+# classes are not even in size, preprocessing will need to occur on the classes so 
+# that there is now an even number of images across all classes. This is to prevent
+# training a biased dataset
 
 def main():
 
@@ -66,7 +71,7 @@ def main():
 		#-------------------------
 		# SOMETHING HERE TO CONVERT % SPLIT TO NUMBER OF FILES FOR EACH FOLDER TO OUTPUT
 		#-------------------------
-		
+
 		# Create an training set output folders
 		os.mkdir("./trainingSet/{}{}-{}".format(trainingSplit,"%",folder))
 
