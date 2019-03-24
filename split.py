@@ -6,9 +6,10 @@ import math
 import cv2 as cv
 
 # NB: This will take all classes and split each class the % split defined. As the 
-# classes are not even in size, preprocessing will need to occur on the classes so 
-# that there is now an even number of images across all classes. This is to prevent
-# training a biased dataset
+# classes are not even in size, preprocessing will need to occur on the training set 
+# classes so that there is now an even number of images across all classes. This is to 
+# prevent training a biased model towards a particular class with more images in the 
+# training set. 
 
 def main():
 
