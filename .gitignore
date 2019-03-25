@@ -1,8 +1,10 @@
 dataset
 originalImages
-projectEnv
+dogsEnv
 testSet
 trainingSet
 validationSet 
 preprocessData.py
 rename.py
+nnCoursework.todo
+requirements.txt
