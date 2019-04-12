@@ -59,12 +59,12 @@ def main():
 		files = os.listdir("./originalImages/{}".format(folder))
 
 		# Get number of files in each folder
-		numberOfFiles = len([name for name in os.listdir("./originalImages/{}".format(folder)) if os.path.isfile(os.path.join("./originalImages/{}".format(folder), name))])
+		numberOfFiles = len([name for name in files if os.path.isfile(os.path.join("./originalImages/{}".format(folder), name))])
 		print("Total images: {}".format(numberOfFiles))
 
-		numberTrainingImages = math.floor(numberOfFiles / 100) * int(trainingSplit)
-		numberValidationImages = math.floor(numberOfFiles / 100) * int(validationSplit)
-		numberTestImages = math.floor(numberOfFiles / 100) * int(testSplit)
+		numberTrainingImages = math.floor(numberOfFiles / 100* int(trainingSplit))
+		numberValidationImages = math.floor(numberOfFiles / 100 * int(validationSplit)) 
+		numberTestImages = math.floor(numberOfFiles / 100 * int(testSplit))
 		print("Number of training images: {}".format(numberTrainingImages))
 		print("Number of validation images: {}".format(numberValidationImages))
 		print("Number of test images: {}".format(numberTestImages))
@@ -82,20 +82,24 @@ def main():
 		# Create a test set output folder
 		os.mkdir("./testSet/{}{}-{}".format(testSplit,"%",folder))
 
-		# Start output filename counter
 		fileName = 1
 
-		# for picture in files:
+		for pictureName in files:
+			rnumber = random.randint(1,101)
+			picture = cv.imread("./originalImages/{}/{}".format(folder,pictureName))
 
-		# 	cv.imwrite("./trainingSet/{}/{}.jpg".format(folder,fileName), trainingImages)
-		# 	fileName = fileName + 1
-			
-		# 	cv.imwrite("./validationSet/{}/{}.jpg".format(folder,fileName), validationImages)
-		# 	fileName = fileName + 1
 
-		# 	cv.imwrite("./testSet/{}/{}.jpg".format(folder,fileName), testImages)
-		# 	fileName = fileName + 1
+			if rnumber <= int(trainingSplit):
+				cv.imwrite("./trainingSet/{}{}-{}/{}.jpg".format(trainingSplit,"%",folder,fileName), picture)
+				fileName = fileName + 1
 
+			elif rnumber <= int(trainingSplit) + int(validationSplit):
+				cv.imwrite("./validationSet/{}{}-{}/{}.jpg".format(validationSplit,"%",folder,fileName), picture)
+				fileName = fileName + 1
+
+			else:
+				cv.imwrite("./testSet/{}{}-{}/{}.jpg".format(testSplit,"%",folder,fileName), picture)
+				fileName = fileName + 1
 		
 
 
