@@ -21,9 +21,43 @@ def main(doAugs, split, lr, model):
 
     model = buildModel(model, n_classes)
 
-    trainingTime(model, loadingTrain, lr)
+    trainingTime(model, loadingTrain, loadingVal, lr)
 
     testingTime(model, loadingTest)
+
+
+def validatingTime(model, loadingVal):
+
+    print("Validating...")
+    model.eval()
+
+    iterations = 0
+    accuracy = 0
+    valLoss = 0
+
+    criterion = nn.CrossEntropyLoss()
+
+    with torch.no_grad(): # Don't back propagate validation data
+        for images, labels in loadingVal:
+
+            images, labels = images.cuda(), labels.cuda()
+
+            output = model(images)
+            loss = criterion(output,labels) 
+            valLoss = valLoss + loss.item()
+
+            iterations = iterations + 1
+            
+            _, outputMax = torch.max(output, 1)
+            accuracy += (outputMax == labels).sum().item()
+
+        valLoss = valLoss / iterations
+        print("\nValidation loss: {:.3f}".format(valLoss))
+
+        accuracy = accuracy / (iterations * 4)
+        print("Validation accuracy: {:.3f}%".format(accuracy * 100))
+
+    return valLoss
 
 
 
@@ -61,11 +95,11 @@ def testingTime(model, loadingTest):
 
 
 
-def trainingTime(model, loadingTrain, lr):
+def trainingTime(model, loadingTrain, loadingVal, lr):
 
     print("="*50)
     print("Training...")
-    
+
     criterion = nn.CrossEntropyLoss()
 
     optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
@@ -106,8 +140,10 @@ def trainingTime(model, loadingTrain, lr):
         accuracy = accuracy / (iterations * 4)
         print("Training accuracy: {:.3f}%".format(accuracy * 100))
 
+        validatingTime(model, loadingVal)
 
     
+
 def buildModel(model, n_classes):
 
     if model == "alexnet":
