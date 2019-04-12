@@ -21,6 +21,53 @@ def main(doAugs, split, lr, model):
 
     model = buildModel(model, n_classes)
 
+    trainingTime(model, loadingTrain, lr)
+
+    
+
+def trainingTime(model, loadingTrain, lr):
+
+    criterion = nn.CrossEntropyLoss()
+
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
+
+    numberEpochs = 2
+
+    for epoch in range(numberEpochs):
+        print("-"*50)
+        print("Epoch number: {}".format(epoch))
+
+        model.train()
+
+        epochLoss = 0 
+        iterations = 0
+        accuracy = 0
+
+        for images, labels in loadingTrain:
+
+            images, labels = images.cuda(), labels.cuda()
+
+            optimizer.zero_grad()               # Resets the gradient 
+            output = model(images)              # Number of images evaluated here = batch size
+            loss = criterion(output,labels)     # Calculates the loss via cross entropy loss
+            loss.backward()                     # Feeds the loss bachwards
+            optimizer.step()                    # Runs SGD to update the weights with the gradients
+
+            iterations = iterations + 1
+
+            print("\rBatch loss: {:.3f}".format(loss.item()), end="", flush=True)
+            epochLoss = epochLoss + loss.item()
+
+            _, outputMax = torch.max(output, 1)
+            accuracy += (outputMax == labels).sum().item()
+
+        epochLoss = epochLoss / iterations
+        print("\nEpoch loss: {:.3f}".format(epochLoss))
+
+        accuracy = accuracy / (iterations * 4)
+        print("Training accuracy: {:.3f}%".format(accuracy * 100))
+
+
     
 def buildModel(model, n_classes):
 
@@ -64,19 +111,19 @@ def getDataLoaders(doAugs, split):
 
 
     trainTrans = transforms.Compose([
-    transforms.Resize(256),
-    transforms.RandomCrop(224),
-    transforms.RandomHorizontalFlip(),
-    transforms.ColorJitter(.3, .3, .3),
-    transforms.ToTensor(),
-    transforms.Normalize(_mean, _std),
+        transforms.Resize(256),
+        transforms.RandomCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(.3, .3, .3),
+        transforms.ToTensor(),
+        transforms.Normalize(_mean, _std),
     ])
 
 
     sameSizeTrans = transforms.Compose([
-    transforms.Resize(224),
-    transforms.ToTensor(),
-    transforms.Normalize(_mean, _std),
+        transforms.RandomResizedCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(_mean, _std),
     ])
 
 
