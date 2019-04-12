@@ -23,10 +23,49 @@ def main(doAugs, split, lr, model):
 
     trainingTime(model, loadingTrain, lr)
 
-    
+    testingTime(model, loadingTest)
+
+
+
+def testingTime(model, loadingTest):
+
+    print("="*50)
+    print("Testing...")
+    model.eval()
+
+    iterations = 0
+    accuracy = 0
+    testLoss = 0
+
+    criterion = nn.CrossEntropyLoss()
+
+    with torch.no_grad(): # Don't back propagate test data
+        for images, labels in loadingTest:
+
+            images, labels = images.cuda(), labels.cuda()
+
+            output = model(images)
+            loss = criterion(output,labels) 
+            testLoss = testLoss + loss.item()
+
+            iterations = iterations + 1
+            
+            _, outputMax = torch.max(output, 1)
+            accuracy += (outputMax == labels).sum().item()
+
+        testLoss = testLoss / iterations
+        print("\nTest loss: {:.3f}".format(testLoss))
+
+        accuracy = accuracy / (iterations * 4)
+        print("Test accuracy: {:.3f}%".format(accuracy * 100))
+
+
 
 def trainingTime(model, loadingTrain, lr):
 
+    print("="*50)
+    print("Training...")
+    
     criterion = nn.CrossEntropyLoss()
 
     optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
