@@ -6,8 +6,21 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision import models
 import torchvision.datasets as datasets
+import matplotlib.pyplot as plt
+import numpy as np 
+import shutil
+
+
+
+trainingErrors = []
+testErrors = []
+validationErrors = []
 
 def main(doAugs, split, lr, model):
+
+    
+
+    global trainingErrors, testErrors, validationErrors
 
     print("Using model: {}".format(model))
     print("Using data augmentation: {}".format(doAugs))
@@ -26,7 +39,33 @@ def main(doAugs, split, lr, model):
     testingTime(model, loadingTest)
 
 
+    try:
+        shutil.rmtree("./graphs")
+    except FileNotFoundError:
+        pass    
+
+    os.mkdir("./graphs")
+
+    makePlot(trainingErrors, "Training")
+    makePlot(validationErrors, "Validation")
+
+
+def makePlot(errors, errorType):
+
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.plot(errors)
+
+    plt.xlabel("Epochs")
+    plt.ylabel("{} error".format(errorType))
+    plt.title("Graph to show the {} error over epochs".format(errorType))
+    plt.savefig("graphs/{}Graph.png".format(errorType))
+
+
+
 def validatingTime(model, loadingVal):
+
+    global validationErrors
 
     print("Validating...")
     model.eval()
@@ -53,6 +92,7 @@ def validatingTime(model, loadingVal):
 
         valLoss = valLoss / iterations
         print("\nValidation loss: {:.3f}".format(valLoss))
+        validationErrors.append(valLoss)
 
         accuracy = accuracy / (iterations * 4)
         print("Validation accuracy: {:.3f}%".format(accuracy * 100))
@@ -62,6 +102,8 @@ def validatingTime(model, loadingVal):
 
 
 def testingTime(model, loadingTest):
+
+    global testErrors
 
     print("="*50)
     print("Testing...")
@@ -89,6 +131,7 @@ def testingTime(model, loadingTest):
 
         testLoss = testLoss / iterations
         print("\nTest loss: {:.3f}".format(testLoss))
+        testErrors.append(testLoss)
 
         accuracy = accuracy / (iterations * 4)
         print("Test accuracy: {:.3f}%".format(accuracy * 100))
@@ -96,6 +139,8 @@ def testingTime(model, loadingTest):
 
 
 def trainingTime(model, loadingTrain, loadingVal, lr):
+
+    global trainingErrors
 
     print("="*50)
     print("Training...")
@@ -134,8 +179,12 @@ def trainingTime(model, loadingTrain, loadingVal, lr):
             _, outputMax = torch.max(output, 1)
             accuracy += (outputMax == labels).sum().item()
 
+            # if iterations == 10:
+            #     break
+
         epochLoss = epochLoss / iterations
         print("\nEpoch loss: {:.3f}".format(epochLoss))
+        trainingErrors.append(epochLoss)
 
         accuracy = accuracy / (iterations * 4)
         print("Training accuracy: {:.3f}%".format(accuracy * 100))
@@ -226,7 +275,7 @@ if __name__ == '__main__':
     arguments = arguments.parse_args()
 
     doAugs = True if arguments.a==1 else False
-    split = [arguments.s,(100-arguments.s)/2,(100-arguments.s)/2]
+    split = [arguments.s,int((100-arguments.s)/2),int((100-arguments.s)/2)]
     print("split")
     print(split)
 
