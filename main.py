@@ -220,13 +220,15 @@ if __name__ == '__main__':
 
     arguments = argparse.ArgumentParser()
     arguments.add_argument("--a", default=1, type=int, help="Do data augmentation 1 for Y, 0 for N")
-    arguments.add_argument("--s", default=1, type=int, help="Split to use 1 for 80-10-10, 0 for 50-25-25")
     arguments.add_argument("--lr", default=0.01, type=float, help="Learning rate")
     arguments.add_argument("--mod", default="alexnet")
+    arguments.add_argument("--s", default=80, type=int, help="Training split to use")
     arguments = arguments.parse_args()
 
     doAugs = True if arguments.a==1 else False
-    split = [80,10,10] if arguments.s==1 else [50,25,25]
+    split = [arguments.s,(100-arguments.s)/2,(100-arguments.s)/2]
+    print("split")
+    print(split)
 
     main(doAugs, split, arguments.lr, arguments.mod)
 
