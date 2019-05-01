@@ -149,7 +149,7 @@ def trainingTime(model, loadingTrain, loadingVal, lr):
 
     optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
 
-    numberEpochs = 2
+    numberEpochs = 50
 
     for epoch in range(numberEpochs):
         print("-"*50)
@@ -204,17 +204,29 @@ def buildModel(model, n_classes):
     elif model == "googlenet":
         model = models.googlenet(pretrained=True)
 
+    elif model == "resnet18":
+        model = models.resnet18(pretrained=True)
+
+    elif model == "resnet50":
+        model = models.resnet50(pretrained=True)
+
+
+
     else:
         raise("Model not supported")
 
 
     # Freeze parameters
-    for param in model.features.parameters():
+    for param in model.parameters():
         param.requires_grad = False
 
 
-    #Replace the last fully connected layer with a linear layer
-    model.fc = nn.Linear(512, n_classes)
+    #Replace the last fully connected layer with a linear layers
+    if model=="alexnet" or model=="vgg":
+        model.fc = nn.Linear(512, n_classes)
+    else:
+        num_features = model.fc.in_features
+        model.fc = nn.Linear(num_features, n_classes)
 
     model.cuda() 
 
@@ -276,8 +288,6 @@ if __name__ == '__main__':
 
     doAugs = True if arguments.a==1 else False
     split = [arguments.s,int((100-arguments.s)/2),int((100-arguments.s)/2)]
-    print("split")
-    print(split)
 
     main(doAugs, split, arguments.lr, arguments.mod)
 
