@@ -9,6 +9,9 @@ import torchvision.datasets as datasets
 import matplotlib.pyplot as plt
 import numpy as np 
 import shutil
+from torchnet import meter
+import seaborn as sn
+import pandas as pd 
 
 
 
@@ -26,6 +29,7 @@ def main(doAugs, split, lr, model):
     print("Using data augmentation: {}".format(doAugs))
     print("Using split: {}".format(split))
     print("Learning rate: {}".format(lr))
+    print("Number of epochs: 100")
 
 
     loadingTrain, loadingVal, loadingTest = getDataLoaders(doAugs, split)
@@ -36,7 +40,7 @@ def main(doAugs, split, lr, model):
 
     trainingTime(model, loadingTrain, loadingVal, lr)
 
-    testingTime(model, loadingTest)
+    cMatrix = testingTime(model, loadingTest)
 
 
     try:
@@ -48,6 +52,18 @@ def main(doAugs, split, lr, model):
 
     makePlot(trainingErrors, "Training")
     makePlot(validationErrors, "Validation")
+
+
+    doConfusionMatrix(cMatrix)
+
+
+def doConfusionMatrix(cMatrix):
+    cMatrix.normalized = True
+    dataframe = pd.DataFrame(cMatrix.value(), ["Poodle", "German Shepherd", "Dalmatian", "St Bernard", "Pug"], ["Poodle", "German Shepherd", "Dalmatian", "St Bernard", "Pug"])
+    plt.figure(figsize=(15,15))
+    sn.set(font_scale=1.5)
+    sn.heatmap(dataframe, annot=True, annot_kws={"size": 20}, fmt="g")
+    plt.savefig("graphs/confusionMatrix.png")
 
 
 def makePlot(errors, errorType):
@@ -105,6 +121,8 @@ def testingTime(model, loadingTest):
 
     global testErrors
 
+    cMatrix = meter.ConfusionMeter(5) #Number of classes
+
     print("="*50)
     print("Testing...")
     model.eval()
@@ -129,12 +147,19 @@ def testingTime(model, loadingTest):
             _, outputMax = torch.max(output, 1)
             accuracy += (outputMax == labels).sum().item()
 
+            if len(output) == 4: #batch size = 4
+                cMatrix.add(output.data.squeeze(), labels)
+
+
         testLoss = testLoss / iterations
         print("\nTest loss: {:.3f}".format(testLoss))
         testErrors.append(testLoss)
 
         accuracy = accuracy / (iterations * 4)
         print("Test accuracy: {:.3f}%".format(accuracy * 100))
+
+
+    return cMatrix
 
 
 
@@ -149,7 +174,7 @@ def trainingTime(model, loadingTrain, loadingVal, lr):
 
     optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
 
-    numberEpochs = 50
+    numberEpochs = 1
 
     for epoch in range(numberEpochs):
         print("-"*50)
@@ -193,18 +218,21 @@ def trainingTime(model, loadingTrain, loadingVal, lr):
 
     
 
-def buildModel(model, n_classes):
+def buildModel(architecture, n_classes):
 
-    if model == "alexnet":
+    if architecture == "alexnet":
         model = models.alexnet(pretrained=True)
 
-    elif model == "vgg19":
+    elif architecture == "vgg19":
         model = models.vgg19(pretrained=True)
 
-    elif model == "resnet18":
+    elif architecture == "resnet18":
         model = models.resnet18(pretrained=True)
 
-    elif model == "resnet50":
+    elif architecture == "resnet34":
+        model = models.resnet34(pretrained=True)
+
+    elif architecture == "resnet50":
         model = models.resnet50(pretrained=True)
 
 
@@ -213,15 +241,14 @@ def buildModel(model, n_classes):
         raise("Model not supported")
 
 
-    # Freeze parameters
-    for param in model.parameters():
-        param.requires_grad = False
-
-
     #Replace the last fully connected layer with a linear layers
-    if model=="alexnet" or model=="vgg":
+    if architecture=="alexnet" or architecture=="vgg19":
+        for param in model.features.parameters():
+            param.requires_grad = False
         model.fc = nn.Linear(512, n_classes)
     else:
+        for param in model.parameters():
+            param.requires_grad = False
         num_features = model.fc.in_features
         model.fc = nn.Linear(num_features, n_classes)
 
