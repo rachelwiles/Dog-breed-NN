@@ -201,9 +201,6 @@ def buildModel(model, n_classes):
     elif model == "vgg19":
         model = models.vgg19(pretrained=True)
 
-    elif model == "googlenet":
-        model = models.googlenet(pretrained=True)
-
     elif model == "resnet18":
         model = models.resnet18(pretrained=True)
 
