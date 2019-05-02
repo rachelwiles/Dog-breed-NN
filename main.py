@@ -21,9 +21,15 @@ validationErrors = []
 
 def main(doAugs, split, lr, model):
 
-    
-
     global trainingErrors, testErrors, validationErrors
+
+
+    try:
+        shutil.rmtree("./graphs")
+    except FileNotFoundError:
+        pass    
+
+    os.mkdir("./graphs")
 
     print("Using model: {}".format(model))
     print("Using data augmentation: {}".format(doAugs))
@@ -43,18 +49,12 @@ def main(doAugs, split, lr, model):
     cMatrix = testingTime(model, loadingTest)
 
 
-    try:
-        shutil.rmtree("./graphs")
-    except FileNotFoundError:
-        pass    
-
-    os.mkdir("./graphs")
-
     makePlot(trainingErrors, "Training")
     makePlot(validationErrors, "Validation")
 
 
     doConfusionMatrix(cMatrix)
+
 
 
 def doConfusionMatrix(cMatrix):
@@ -64,6 +64,7 @@ def doConfusionMatrix(cMatrix):
     sn.set(font_scale=1.5)
     sn.heatmap(dataframe, annot=True, annot_kws={"size": 20}, fmt="g")
     plt.savefig("graphs/confusionMatrix.png")
+
 
 
 def makePlot(errors, errorType):
@@ -174,7 +175,7 @@ def trainingTime(model, loadingTrain, loadingVal, lr):
 
     optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
 
-    numberEpochs = 1
+    numberEpochs = 100
 
     for epoch in range(numberEpochs):
         print("-"*50)
@@ -243,9 +244,13 @@ def buildModel(architecture, n_classes):
 
     #Replace the last fully connected layer with a linear layers
     if architecture=="alexnet" or architecture=="vgg19":
-        for param in model.features.parameters():
+        for param in model.parameters():
             param.requires_grad = False
-        model.fc = nn.Linear(512, n_classes)
+        # model.fc = nn.Linear(512, n_classes) # not a thing with these models
+
+        lastLayers = list(model.classifier.children())[:-1]
+        lastLayers.extend([nn.Linear(model.classifier[6].in_features, 5)])
+        model.classifier = nn.Sequential(*lastLayers)
     else:
         for param in model.parameters():
             param.requires_grad = False
