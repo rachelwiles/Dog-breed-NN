@@ -173,7 +173,7 @@ def trainingTime(model, loadingTrain, loadingVal, lr):
 
     criterion = nn.CrossEntropyLoss()
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr) # Momentum, weight decay and dampening defaulted to 0
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.5, weight_decay=0.0001) # Momentum, weight decay and dampening defaulted to 0
 
     numberEpochs = 100
 
