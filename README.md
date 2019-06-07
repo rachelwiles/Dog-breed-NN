@@ -1,7 +1,6 @@
 # Dog breed neural network :dog2:
-## Ongoing assignment
 
-Experimenting with neural networks to classify images of 5 different dog breeds (work in progress)
+## Experimenting with neural networks to classify images of 5 different dog breeds
 
 _Classes_:
 * Poodle
@@ -10,9 +9,12 @@ _Classes_:
 * St Bernard
 * Pug
 
-_To do_:
-- [x] Collect dataset of 5 dog breeds
-- [x] Preprocess the images
-- [x] Split the images into training, validaion and test set
-- [ ] Train NN
-- [ ] Modify parameters
+_Compatible with_:
+* AlexNet
+* VGG-19
+* ResNet-15
+* ResNet-34
+* ResNet-152
+
+Generates training & validation graphs over the training period. Creates a confusion matrix of results. 
+
